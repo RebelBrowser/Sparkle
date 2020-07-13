@@ -39,6 +39,7 @@ NSString *const SUPublicDSAKeyKey = @"SUPublicDSAKey";
 NSString *const SUPublicDSAKeyFileKey = @"SUPublicDSAKeyFile";
 NSString *const SUAutomaticallyUpdateKey = @"SUAutomaticallyUpdate";
 NSString *const SUAllowsAutomaticUpdatesKey = @"SUAllowsAutomaticUpdates";
+NSString *const SUAutomaticallyUpdatesWithoutUIKey = @"SUAutomaticallyUpdatesWithoutUI";
 NSString *const SUEnableSystemProfilingKey = @"SUEnableSystemProfiling";
 NSString *const SUEnableAutomaticChecksKey = @"SUEnableAutomaticChecks";
 NSString *const SUSendProfileInfoKey = @"SUSendProfileInfo";
@@ -49,6 +50,7 @@ NSString *const SUEnableJavaScriptKey = @"SUEnableJavaScript";
 NSString *const SUFixedHTMLDisplaySizeKey = @"SUFixedHTMLDisplaySize";
 NSString *const SUDefaultsDomainKey = @"SUDefaultsDomain";
 NSString *const SUSparkleErrorDomain = @"SUSparkleErrorDomain";
+NSString *const SUMinimumUpdateIntervalKey = @"SUMinimumUpdateInterval";
 
 NSString *const SUAppendVersionNumberKey = @"SUAppendVersionNumber";
 NSString *const SUEnableAutomatedDowngradesKey = @"SUEnableAutomatedDowngrades";
