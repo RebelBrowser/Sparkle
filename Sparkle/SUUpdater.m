@@ -222,6 +222,8 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
         [self.host setBool:NO forUserDefaultsKey:SUUpdateRelaunchingMarkerKey];
     }
 
+    SULog(SULogLevelDefault, @"Sparkle module started. App version %@. Works with %@", [self.host version], [self feedURL]);
+
     if (shouldPrompt) {
         NSArray<NSDictionary<NSString *, NSString *> *> *profileInfo = [SUSystemProfiler systemProfileArrayForHost:self.host];
         // Always say we're sending the system profile here so that the delegate displays the parameters it would send.
@@ -262,7 +264,7 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
     {
         [self setUpdateLastCheckedDate:[self.host objectForUserDefaultsKey:SULastCheckTimeKey]];
     }
-    
+
     return [self updateLastCheckedDate];
 }
 
@@ -339,7 +341,7 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
 
     // Do not use reachability for a preflight check. This can be deceptive and a bad idea. Apple does not recommend doing it.
     SUUpdateDriver *theUpdateDriver = [(SUBasicUpdateDriver *)[(automatic ? [SUAutomaticUpdateDriver class] : [SUScheduledUpdateDriver class])alloc] initWithUpdater:self];
-    
+
     [self checkForUpdatesWithDriver:theUpdateDriver];
 }
 
@@ -376,13 +378,19 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
 
 - (void)checkForUpdatesWithDriver:(SUUpdateDriver *)d
 {
-	if ([self updateInProgress]) { return; }
+    SULog(SULogLevelDefault, @"Requested for update via %@", NSStringFromClass([d class]));
+
+	if ([self updateInProgress]) {
+        SULog(SULogLevelDefault, @"Update check rejected: in progress");
+        return;
+    }
 	if (self.checkTimer) { [self.checkTimer invalidate]; self.checkTimer = nil; }		// Timer is non-repeating, may have invalidated itself, so we had to retain it.
 
     [self updateLastUpdateCheckDate];
 
     if( [self.delegate respondsToSelector: @selector(updaterMayCheckForUpdates:)] && ![self.delegate updaterMayCheckForUpdates: self] )
 	{
+        SULog(SULogLevelDefault, @"Update check rejected: not allowed by delegate");
         [self scheduleNextUpdateCheck];
         return;
     }
@@ -392,6 +400,7 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
     // If we're not given a driver at all, just schedule the next update check and bail.
     if (!self.driver)
     {
+        SULog(SULogLevelDefault, @"Update check rejected: no driver is set");
         [self scheduleNextUpdateCheck];
         return;
     }
@@ -401,8 +410,10 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
     NSURL *theFeedURL = [self parameterizedFeedURL];
     if (theFeedURL) // Use a NIL URL to cancel quietly.
         [self.driver checkForUpdatesAtURL:theFeedURL host:self.host];
-    else
+    else {
+        SULog(SULogLevelDefault, @"Update check aborted: empty url");
         [self.driver abortUpdate];
+    }
 }
 
 - (void)registerAsObserver
@@ -569,6 +580,7 @@ static NSString *escapeURLComponent(NSString *str) {
         parameters = [parameters arrayByAddingObjectsFromArray:[SUSystemProfiler systemProfileArrayForHost:self.host]];
         [self.host setObject:[NSDate date] forUserDefaultsKey:SULastProfileSubmitDateKey];
     }
+
 	if ([parameters count] == 0) { return baseFeedURL; }
 
     // Build up the parameterized URL.

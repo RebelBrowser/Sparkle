@@ -18,6 +18,7 @@
 #import "SULocalizations.h"
 #import "SUAppcastItem.h"
 #import "SUApplicationInfo.h"
+#import "SULog.h"
 
 #if __MAC_OS_X_VERSION_MAX_ALLOWED < 1080
 @interface NSByteCountFormatter : NSFormatter {
@@ -120,7 +121,7 @@
 
     if (!self.automaticallyInstallUpdates) {
         NSAlert *alert = [[NSAlert alloc] init];
-        
+
         if (self.latestAppcastItem) // if the appcast was successfully loaded
         {
             alert.messageText = SULocalizedString(@"You're up-to-date!", "Status message shown when the user checks for updates but is already current or the feed doesn't contain any updates.");
@@ -138,10 +139,10 @@
             alert.informativeText = SULocalizedString(@"No valid update information could be loaded.", nil);
             [alert addButtonWithTitle:SULocalizedString(@"Cancel Update", nil)];
         }
-	    
+
         [self showAlert:alert];
     }
-    
+
     [self abortUpdate];
 }
 
@@ -168,19 +169,22 @@
     id<SUUpdaterPrivate> updater = self.updater;
     switch (choice) {
         case SUInstallUpdateChoice:
+            SULog(SULogLevelDefault, @"User chose: update");
             [self didDismissAlertPermanently:NO forItem:item];
             [self downloadUpdate];
             break;
 
         case SUOpenInfoURLChoice:
+            SULog(SULogLevelDefault, @"User chose: see info");
             [self didDismissAlertPermanently:NO forItem:item];
             [[NSWorkspace sharedWorkspace] openURL:[self.updateItem infoURL]];
             [self abortUpdate];
             break;
 
         case SUSkipThisVersionChoice:
-            if ([[updater delegate] respondsToSelector:@selector(updater:userDidSkipThisVersion:)]) { 
-                [[updater delegate] updater:self.updater userDidSkipThisVersion:self.updateItem]; 
+            SULog(SULogLevelDefault, @"User chose: skip this version");
+            if ([[updater delegate] respondsToSelector:@selector(updater:userDidSkipThisVersion:)]) {
+                [[updater delegate] updater:self.updater userDidSkipThisVersion:self.updateItem];
             }
             [self didDismissAlertPermanently:YES forItem:item];
             [self.host setObject:[self.updateItem versionString] forUserDefaultsKey:SUSkippedVersionKey];
@@ -188,6 +192,7 @@
             break;
 
         case SURemindMeLaterChoice:
+            SULog(SULogLevelDefault, @"User chose: remind later");
             [self didDismissAlertPermanently:NO forItem:item];
             [self abortUpdate];
             break;
@@ -201,15 +206,15 @@
         self.statusController = [[SUStatusController alloc] initWithHost:self.host];
         createdStatusController = YES;
     }
-    
+
     [self.statusController beginActionWithTitle:SULocalizedString(@"Downloading update...", @"Take care not to overflow the status window.") maxProgressValue:0.0 statusText:nil];
     [self.statusController setButtonTitle:SULocalizedString(@"Cancel", nil) target:self action:@selector(cancelDownload:) isDefault:NO];
     [self.statusController setButtonEnabled:YES];
-    
+
     if (createdStatusController) {
         [self.statusController showWindow:self];
     }
-    
+
     [super downloadUpdate];
 }
 
@@ -274,7 +279,7 @@
 {
     if (self.download) {
         [self.download cancel];
-        
+
         id<SUUpdaterPrivate> updater = self.updater;
         if ([[updater delegate] respondsToSelector:@selector(userDidCancelDownload:)]) {
             [[updater delegate] userDidCancelDownload:self.updater];
@@ -290,7 +295,7 @@
         [self.statusController beginActionWithTitle:SULocalizedString(@"Extracting update...", @"Take care not to overflow the status window.") maxProgressValue:0.0 statusText:nil];
         [self.statusController setButtonEnabled:NO];
     };
-    
+
     if (![NSThread mainThread]) {
         dispatch_sync(dispatch_get_main_queue(), updateUI);
     } else {
