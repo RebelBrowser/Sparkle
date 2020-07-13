@@ -80,6 +80,20 @@ SU_EXPORT extern NSString *const SUUpdaterAppcastNotificationKey;
 - (nullable NSString *)feedURLStringForUpdater:(SUUpdater *)updater;
 
 /*!
+ Returns whether the appcast request should include the current version.
+
+ \param updater The SUUpdater instance.
+ */
+- (BOOL)updateRequestShouldIncludeVersion:(SUUpdater *)updater;
+
+/*!
+ Returns whether the appcast request should include the device UID.
+
+ \param updater The SUUpdater instance.
+ */
+- (BOOL)updateRequestShouldIncludeDeviceUID:(SUUpdater *)updater;
+
+/*!
  Returns whether Sparkle should prompt the user about automatic update checks.
  
  Use this to override the default behavior.

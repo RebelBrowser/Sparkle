@@ -195,18 +195,29 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
 {
     NSMutableArray *parameters = [NSMutableArray new];
 
-    if ([self.host displayVersion].length > 0) {
+    bool includeVersion = true;
+    bool includeDeviceUID = true;
+
+    if ([self.delegate respondsToSelector:@selector(updateRequestShouldIncludeVersion:)]) {
+        includeVersion = [self.delegate updateRequestShouldIncludeVersion:self];
+    }
+    if ([self.delegate respondsToSelector:@selector(updateRequestShouldIncludeDeviceUID:)]) {
+        includeDeviceUID = [self.delegate updateRequestShouldIncludeDeviceUID:self];
+    }
+
+    if (includeVersion && ([self.host displayVersion].length > 0)) {
         NSMutableDictionary *item = [NSMutableDictionary new];
         item[@"key"] = @"appVersionShort";
         item[@"value"] = [self.host displayVersion];
         [parameters addObject:item];
     }
-    if (self.deviceUIDString.length > 0) {
+    if (includeDeviceUID && (self.deviceUIDString.length > 0)) {
         NSMutableDictionary *item = [NSMutableDictionary new];
         item[@"key"] = @"deviceID";
         item[@"value"] = self.deviceUIDString;
         [parameters addObject:item];
     }
+
     return parameters;
 }
 
