@@ -224,10 +224,7 @@ static NSString *const SUUpdaterDefaultsObservationContext = @"SUUpdaterDefaults
 #pragma mark - End Viasat methods
 
 -(void)showAlertText:(NSString *)text informativeText:(NSString *)informativeText {
-    NSAlert *alert = [[NSAlert alloc] init];
-    alert.messageText = text;
-    alert.informativeText = informativeText;
-    [self.driver showAlert:alert];
+    SULog(SULogLevelError, @"WARNING: %s, %s", text, informativeText);
 }
 
 -(void)checkIfConfiguredProperly {
